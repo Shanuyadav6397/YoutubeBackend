@@ -8,7 +8,7 @@ import { DB_URL } from './serverConfig.js';
 async function connectDB() {
     try {
         const connectionInstance = await mongoose.connect(`${DB_URL} / ${DB_NAME}`);
-        console.log(`\n MOngoDb Connected !! DB HOST : ${connectionInstance.connection.host} / ${DB_NAME}`);
+        console.log(`\nMongoDB Connected !! DB HOST : ${connectionInstance.connection.host} / ${DB_NAME}`);
         process.exit(1);
         
     } catch (error) {

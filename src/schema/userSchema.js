@@ -31,7 +31,7 @@ const userSchema = new Schema(
       type: String,
       trime: true,
       required: [true, "Email should be provided"],
-      unique: [true, `${this.email} already exist`],
+      unique: [true, `email is already exist`],
       match: [
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
         "Please fill a valid email address",
