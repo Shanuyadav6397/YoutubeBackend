@@ -13,8 +13,8 @@ async function findUser(parameters) {
 //if the user does not exist in the database, we will create a new user
 async function createUser(userDetails) { 
     try {
-        const User = await User.create(userDetails);
-        return User;
+        const newUser = await User.create(userDetails);
+        return newUser;
     } catch (error) {
         console.log(error);
     }

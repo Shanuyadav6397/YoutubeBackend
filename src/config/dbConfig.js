@@ -9,7 +9,6 @@ async function connectDB() {
     try {
         const connectionInstance = await mongoose.connect(`${DB_URL} / ${DB_NAME}`);
         console.log(`\nMongoDB Connected !! DB HOST : ${connectionInstance.connection.host} / ${DB_NAME}`);
-        process.exit(1);
         
     } catch (error) {
         console.log("Not able to connect to the mongodb server");
