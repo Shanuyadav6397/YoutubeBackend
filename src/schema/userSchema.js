@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
+//import { JWT_ACCESS_TOKEN_EXPIRE, JWT_ACCESS_TOKEN_SECRET, JWT_REFRESH_TOKEN_EXPIRE, JWT_REFRESH_TOKEN_SECRET } from "../config/serverConfig.js";
 
 const userSchema = new Schema(
   {
@@ -70,6 +71,24 @@ userSchema.pre("save", async function (next) {
   this.password = hashedPassword;
   next();
 });
+
+// userSchema.methods.generateToken = function () {
+//   const token = jwt.sign(
+//     { email: this.email, username: this.userName, id: this._id },
+//     JWT_ACCESS_TOKEN_SECRET,
+//     { expiresIn: JWT_ACCESS_TOKEN_EXPIRE }
+//   );
+//   return token;
+// }
+// userSchema.methods.generteRefreshToken = function () {
+//   const refreshToken = jwt.sign(
+//     { id: this._id },
+//     JWT_REFRESH_TOKEN_SECRET,
+//     { expiresIn: JWT_REFRESH_TOKEN_EXPIRE }
+//   );
+//   this.refreshToken = refreshToken;
+//   return refreshToken;
+// }
 
 const User = mongoose.model("User", userSchema); // colection
 

@@ -31,4 +31,6 @@ const server = app.listen(PORT, async () => {
 
 // here import routers
 import { userRouter } from "./routes/userRoute.js";
+import { loginRouter } from "./routes/authRoute.js";
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/users", loginRouter);
