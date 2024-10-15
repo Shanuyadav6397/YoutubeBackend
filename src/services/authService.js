@@ -3,6 +3,7 @@ import { findUser } from "../repository/userRepository.js";
 import { ApiError } from "../utils/ApiError.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { NotFoundError } from "../utils/notFoundError.js";
 
 async function loginUser(userAuthDetails) {
     // 1. username or email and password are required
@@ -18,7 +19,7 @@ async function loginUser(userAuthDetails) {
     console.log(user);
     // if the user not found
     if(!user){
-        throw new ApiError(404, "User does not exist");
+        throw new NotFoundError("User");
     }
     // 3. validate the password
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -41,6 +42,7 @@ async function loginUser(userAuthDetails) {
         {expiresIn: JWT_REFRESH_TOKEN_EXPIRE}
     );
     console.log(refreshToken);
+    console.log(user._id);
 
     user.refreshToken = refreshToken;
     await user.save({validateBeforeSave: false});
