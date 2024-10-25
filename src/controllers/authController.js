@@ -6,22 +6,31 @@ async function login(req, res) {
     //console.log(loginPayload);
     const response = await loginUser(loginPayload);
 
-    res.cookie("accessToken", response, {
+    res.cookie("generateAccessToken", response, {
       httpOnly: true, // this cookie cannot be accessed by client side javascript
       secure: true,
-    }).cookie("refreshToken", response, {
+    }).cookie("generateRefreshToken", response, {
       httpOnly: true,
       secure: true,
     });
     return res.status(200).json(new ApiResponse(200, "LoggedIn success", {}, {}),);
   } catch (error) {
-    return res.status(error.statusCode).json({
-      success: false,
-      data: {},
-      message: error.message,
-      error: error,
-    });
+    return res.status(500).json(new ApiResponse(error.statusCode, error.message, {}, error));
   }
 }
 
-export { login };
+async function logout(req, res){
+  await updatedUser(req.user.id, {generateRefreshToken: undefined});
+  res.clearCookie("generateAccessToken", response, {
+    httpOnly: true,
+    secure: true,
+  }).clearCookie("generateRefreshToken", response, {
+    httpOnly: true,
+    secure: true,
+  });
+  return res.status(200).json(new ApiResponse(200, "Logged out successfully", {}, {}));
+  
+}
+
+
+export { login, logout };

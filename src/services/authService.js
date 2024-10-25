@@ -9,7 +9,7 @@ async function loginUser(userAuthDetails) {
     // 1. username or email and password are required
     const {userName, email, password} = userAuthDetails;
     console.log(userName, email, password);
-    if(!userName || !email){
+    if(!(userName || email)){
         throw new ApiError(400, "Username or email is required");
     }
     // 2. find the user with the given username or email
@@ -21,33 +21,33 @@ async function loginUser(userAuthDetails) {
     if(!user){
         throw new NotFoundError("User");
     }
-    // 3. validate the password
+    // 3. if the user is found validate the password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     // if the password is invalid
     if(!isPasswordValid){
         throw new ApiError(401, "Invalid password, please try again");
     }
     console.log(isPasswordValid);
-    // 4. generate a token
-    const accessToken = jwt.sign(
+    // 4. if the password is valid then Generate the access token and refresh token
+    const generateAccessToken = jwt.sign(
         {email: user.email, userName:user.userName, id: user._id},
         JWT_ACCESS_TOKEN_EXPIRE,
         {expiresIn:JWT_ACCESS_TOKEN_EXPIRE}
     );
-    console.log(accessToken);
+    console.log("Access Token",generateAccessToken);
 
-    const refreshToken = jwt.sign(
+    const generateRefreshToken = jwt.sign(
         {id: user._id},
         JWT_REFRESH_TOKEN_SECRET,
         {expiresIn: JWT_REFRESH_TOKEN_EXPIRE}
     );
-    console.log(refreshToken);
+    console.log("Refresh Token",generateRefreshToken);
     console.log(user._id);
 
-    user.refreshToken = refreshToken;
-    await user.save({validateBeforeSave: false});
+    user.refreshToken = generateRefreshToken;
+    await user.save({validateBeforeSave: false}); // save the refresh token in the database wihout validating the required fields
     // 5. return the token in secure cookie
-    return {accessToken, refreshToken};
+    return {generateAccessToken, generateRefreshToken};
 }
 
 export {loginUser}

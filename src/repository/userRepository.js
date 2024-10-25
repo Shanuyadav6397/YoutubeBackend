@@ -20,4 +20,14 @@ async function createUser(userDetails) {
     }
 }
 
-export { createUser, findUser };
+async function updateUser(parameters, update) {
+    try {
+        const updatedUser = await User.findByIdAndUpdate(parameters, update, {new: true});
+        return updatedUser;
+    }
+    catch (error) {
+        console.log(error);
+    }
+}
+
+export { createUser, findUser, updateUser };
