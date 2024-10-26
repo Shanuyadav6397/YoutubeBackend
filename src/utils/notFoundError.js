@@ -1,4 +1,4 @@
-import AppError from './appError.js';
+import AppError from './AppError.js';
 class NotFoundError extends AppError {
     constructor(resource) {
         super(`Not abel to find ${resource}`, 404);
