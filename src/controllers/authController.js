@@ -23,6 +23,7 @@ async function login(req, res) {
 async function refreshToken(req, res) {
   try {
     const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+    console.log(refreshToken);
     const response = await refreshAccessToken(refreshToken);
     res.cookie('generateAccessToken', response, {
       httpOnly: true, // this cookie cannot be accessed by client side javascript
