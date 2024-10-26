@@ -22,7 +22,7 @@ async function login(req, res) {
 
 async function refreshToken(req, res) {
   try {
-    const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+    const refreshToken = req.cookies.generateRefreshToken || req.body.generateRefreshToken;
     console.log(refreshToken);
     const response = await refreshAccessToken(refreshToken);
     res.cookie('generateAccessToken', response, {

@@ -52,7 +52,7 @@ async function loginUser(userAuthDetails) {
 
 async function refreshAccessToken(userRefreshTokenDetails){
     // 1. check if the refresh token is provided
-    const incomingRefreshTokwn = userRefreshTokenDetails.refreshToken;
+    const incomingRefreshTokwn = userRefreshTokenDetails.generateRefreshToken;
    if(!incomingRefreshTokwn){
        throw new ApiError(401, "unauthorized request");
     }
@@ -62,7 +62,7 @@ async function refreshAccessToken(userRefreshTokenDetails){
         throw new ApiError(401, "unauthorized, please login to get the access token");
     }
     // 3. find the user with the id from the refresh token
-    const user = await findUser({_id: decoded.id});
+    const user = await findUser({_id: decodedToken.id});
     if(!user){
         throw new ApiError(401, "Invalid refresh token, please login to get the access token");
     }
@@ -76,11 +76,12 @@ async function refreshAccessToken(userRefreshTokenDetails){
             JWT_ACCESS_TOKEN_EXPIRE,
             {expiresIn:JWT_ACCESS_TOKEN_EXPIRE}
         );
+        return generateAccessToken;
     } catch (error) {
         throw new ApiError(500, "Internal server error, please try again");
     }
     // 5. return the new access token
-    return generateAccessToken;
+    
 }
 
 export {loginUser, refreshAccessToken};
