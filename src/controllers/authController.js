@@ -1,5 +1,4 @@
-import User from "../schema/userSchema.js";
-import { changePassword, loginUser, refreshAccessToken } from "../services/authService.js";
+import { changePassword, loginUser, refreshAccessToken, updateAccountDetails } from "../services/authService.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 async function login(req, res) {
   try {
@@ -66,5 +65,16 @@ async function changeCurrentPassword(req, res){
   }
 }
 
+async function  updateUser(req, res) {
+  try {
+    const user = req.body;
+    const response = await updateAccountDetails(user);
+    return res.status(200).json(new ApiResponse(200, "User details updated successfully", response, {}));
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(new ApiResponse(error.statusCode, error.message, {}, error));
+    
+  }
+}
 
-export { login, refreshToken, logout, changeCurrentPassword };
+export { login, refreshToken, logout, changeCurrentPassword, updateUser };

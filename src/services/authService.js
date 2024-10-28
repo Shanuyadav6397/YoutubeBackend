@@ -1,9 +1,10 @@
 import { JWT_ACCESS_TOKEN_EXPIRE, JWT_REFRESH_TOKEN_EXPIRE, JWT_REFRESH_TOKEN_SECRET } from "../config/serverConfig.js";
-import { findUser } from "../repository/userRepository.js";
+import { findUser, updateUser } from "../repository/userRepository.js";
 import { ApiError } from "../utils/ApiError.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { NotFoundError } from "../utils/notFoundError.js";
+import { BadRequestError } from "../utils/badRequestError.js";
 
 async function loginUser(userAuthDetails) {
     // 1. username or email and password are required
@@ -113,8 +114,29 @@ async function changePassword(userChangePasswordDetails){
 
 }
 
-async function getCurrentUser(){
-
+async function updateAccountDetails(accountDetails){
+    // 1. check if the email is provided
+    const { email, id } = accountDetails; 
+    if(!email){
+        throw new ApiError(400, "Email is required");
+    }
+    // 2. check if the email is already taken
+    const userWithEmail = await findUser({email});
+    console.log(userWithEmail);
+    if(userWithEmail){
+        throw new ApiError(400, "Email is already taken");
+    }
+    // 3. find the user with the id and update the user email
+    const user = await updateUser({_id: id}, {
+        $set: {
+            email:email
+        }
+     }
+    );
+    if(!user){
+        throw new NotFoundError("User");
+    }
+    return user;
 }
 
-export { loginUser, refreshAccessToken, changePassword };
+export { loginUser, refreshAccessToken, changePassword, updateAccountDetails };

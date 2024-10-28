@@ -22,7 +22,7 @@ async function createUser(userDetails) {
 
 async function updateUser(parameters, update) {
     try {
-        const updatedUser = await User.findByIdAndUpdate(parameters, update, {new: true});
+        const updatedUser = await User.findByIdAndUpdate(parameters, update, {new: true}).select("-password");
         return updatedUser;
     }
     catch (error) {
