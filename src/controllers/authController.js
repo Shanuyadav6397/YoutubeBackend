@@ -1,4 +1,5 @@
-import { loginUser, refreshAccessToken } from "../services/authService.js";
+import User from "../schema/userSchema.js";
+import { changePassword, loginUser, refreshAccessToken } from "../services/authService.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 async function login(req, res) {
   try {
@@ -52,5 +53,18 @@ async function logout(req, res){
   
 }
 
+async function changeCurrentPassword(req, res){
+  try {
+    const changePasswordPayload = req.body;
+    console.log(changePasswordPayload);
+    const response = await changePassword(changePasswordPayload);
+    return res.status(200).json(new ApiResponse(200, "Password changed successfully", response, {}));
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(new ApiResponse(error.statusCode, error.message, {}, error));
+    
+  }
+}
 
-export { login, refreshToken, logout };
+
+export { login, refreshToken, logout, changeCurrentPassword };
