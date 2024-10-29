@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { NotFoundError } from "../utils/notFoundError.js";
 import { BadRequestError } from "../utils/badRequestError.js";
+import { uploadOnCloudinary } from "../config/cloudinaryConfig.js";
 
 async function loginUser(userAuthDetails) {
     // 1. username or email and password are required
@@ -122,9 +123,12 @@ async function updateAccountDetails(accountDetails){
     }
     // 2. check if the email is already taken
     const userWithEmail = await findUser({email});
-    console.log(userWithEmail);
     if(userWithEmail){
         throw new ApiError(400, "Email is already taken");
+    }
+    const emailRegex =  /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    if(!emailRegex.test(email)){
+        throw new ApiError(400, "Please fill a valid email address");
     }
     // 3. find the user with the id and update the user email
     const user = await updateUser({_id: id}, {
@@ -139,4 +143,37 @@ async function updateAccountDetails(accountDetails){
     return user;
 }
 
-export { loginUser, refreshAccessToken, changePassword, updateAccountDetails };
+async function updateUserAvatar(avatarDetails){
+    console.log(avatarDetails);
+    // 1. check if the avatar is provided
+    const avatarLocalPath = avatarDetails.file.path;
+    console.log(avatarLocalPath);
+    if(!avatarLocalPath){
+        throw new ApiError(400, "Avatar is required");
+    }
+    // 2. upload the avatar to the cloudinary
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+    console.log(avatar.url);
+    if(!avatar.url){
+        throw new ApiError(500, "Error when  uploading the avatar on cloudinary");
+    }
+    // 3. find the user with the id and update the user avatar
+    const user = await updateUser({_id: avatarDetails.id}, {
+        $set: {
+            avatar: avatar.url
+        }
+    });
+    if(!user){
+        throw new NotFoundError("User");
+    }
+    return user;
+    
+}
+
+export { 
+    loginUser,
+    refreshAccessToken,
+    changePassword,
+    updateAccountDetails,
+    updateUserAvatar
+};

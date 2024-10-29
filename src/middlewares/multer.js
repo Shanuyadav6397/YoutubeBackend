@@ -10,7 +10,7 @@ const storageConfiguration = multer.diskStorage({
     //filename is used to specify the name of the file.
     // Here more functions add in filename to make the file name unique after project completion
     next(null, Date.now() + "_" + file.originalname);
-    console.log(file);
+    //console.log(file);
   },
 });
 

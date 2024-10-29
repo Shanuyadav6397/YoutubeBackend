@@ -1,4 +1,5 @@
-import { changePassword, loginUser, refreshAccessToken, updateAccountDetails } from "../services/authService.js";
+import { changePassword, loginUser, refreshAccessToken, updateAccountDetails, updateUserAvatar } 
+from "../services/authService.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 async function login(req, res) {
   try {
@@ -76,5 +77,23 @@ async function  updateUser(req, res) {
     
   }
 }
+ async function updateAvatar(req, res){
+  try {
+    const user = await updateUserAvatar({ id: req.body.id, file: req.file }); 
+    console.log(req.body.id);
+    return res.status(200).json(new ApiResponse(200, "User details updated successfully", user, {}));
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json(new ApiResponse(error.statusCode, error.message, {}, error));
+    
+  }
+ }
 
-export { login, refreshToken, logout, changeCurrentPassword, updateUser };
+export {
+  login,
+  refreshToken,
+  logout,
+  changeCurrentPassword,
+  updateUser,
+  updateAvatar
+};
