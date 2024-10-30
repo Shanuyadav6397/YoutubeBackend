@@ -261,6 +261,57 @@ async function updateUserCoverImage(coverImageDetails){
     return channel[0];
 };
 
+async function getUserWatchHistory(userWatchHistoryDetails){
+    // 1. check if the user id is provided
+    const { id } = userWatchHistoryDetails;
+    if(!id){
+        throw new ApiError(400, "User id is required");
+    }
+    // 2. find the user with the id and populate the watch history
+    const user = await aggergateUser([
+        {
+            $match: {_id: new mongoose.Types.ObjectId(id)} // convert the string id to object id
+        },
+        {
+            $lookup: {
+                from: "videos",
+                localField: "watchHistory",
+                foreignField: "_id",
+                as: "watchHistory",
+                pipeline: [
+                    {
+                        $lookup:{
+                            from: "users",
+                            localField: "owner",
+                            foreignField: "_id",
+                            as: "owner",
+                            pipeline:[
+                                {
+                                    $project: {
+                                        firstName: 1,
+                                        lastName: 1,
+                                        userName: 1,
+                                        avatar: 1
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields: {
+                            owner: {$arrayElemAt: ["$owner", 0]} // owner: {$first: "$owner"}
+                        }
+                    },
+                ]
+            }
+        }
+    ]);
+    if(!user?.length){
+        throw new NotFoundError("User");
+    }
+    return user[0].watchHistory;
+}
+
 export { 
     loginUser,
     refreshAccessToken,
@@ -268,5 +319,6 @@ export {
     updateAccountDetails,
     updateUserAvatar,
     updateUserCoverImage,
-    getUserChannelProfile
+    getUserChannelProfile,
+    getUserWatchHistory
 };
