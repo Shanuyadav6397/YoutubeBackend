@@ -1,10 +1,13 @@
-import { JWT_ACCESS_TOKEN_EXPIRE, JWT_REFRESH_TOKEN_EXPIRE, JWT_REFRESH_TOKEN_SECRET } from "../config/serverConfig.js";
-import { findUser, updateUser } from "../repository/userRepository.js";
+import {
+    JWT_ACCESS_TOKEN_EXPIRE,
+    JWT_REFRESH_TOKEN_EXPIRE,
+    JWT_REFRESH_TOKEN_SECRET
+} from "../config/serverConfig.js";
+import { findUser, updateUser, aggergateUser } from "../repository/userRepository.js";
 import { ApiError } from "../utils/ApiError.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { NotFoundError } from "../utils/notFoundError.js";
-import { BadRequestError } from "../utils/badRequestError.js";
 import { uploadOnCloudinary } from "../config/cloudinaryConfig.js";
 
 async function loginUser(userAuthDetails) {
@@ -170,10 +173,100 @@ async function updateUserAvatar(avatarDetails){
     
 }
 
+async function updateUserCoverImage(coverImageDetails){
+    console.log(coverImageDetails);
+    // 1. check if the cover image is provided
+    const coverImageLocalPath = coverImageDetails.file.path;
+    console.log(coverImageLocalPath);
+    if(!coverImageLocalPath){
+        throw new ApiError(400, "Cover Image is required");
+    }
+    // 2. upload the cover image to the cloudinary
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+    console.log(coverImage.url);
+    if(!coverImage.url){
+        throw new ApiError(500, "Error when  uploading the cover Image on cloudinary");
+    }
+    // 3. find the user with the id and update the user avatar
+    const user = await updateUser({_id: coverImageDetails.id}, {
+        $set: {
+            coverImage: coverImage.url
+        }
+    });
+    if(!user){
+        throw new NotFoundError("User");
+    }
+    return user;
+    
+}
+
+ async function getUserChannelProfile(userDetils){
+    // 1. check if the username is provided
+    const { userName } = userDetils;
+    if(!userName?.trim()){
+        throw new ApiError(400, "Username is missing");
+    } 
+    // 2. find the user with the given username and populate the subscribers and subscribedTo
+    const channel = await aggergateUser([
+        {
+            $match: {userName: userName?.toLowerCase()}
+        },
+        {
+            $lookup: {
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "channel",
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup:{
+                from: "subscriptions",
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields: {
+                totalSubscribers: {$size: "$subscribers"},
+                totalSubscribedTo: {$size: "$subscribedTo"},
+                isSubscribed: {
+                    $cond: {
+                        if:{$in: [userDetils.id, "$subscribers.subscriber"]},
+                        then: true,
+                        else: false
+                    }
+                }
+            }
+        },
+        {
+            $project: {
+                userName: 1,
+                firstName: 1,
+                lastName: 1,
+                totalSubscribers: 1,
+                totalSubscribedTo: 1,
+                avatar: 1,
+                coverImage: 1,
+                isSubscribed: 1,
+                email: 1,
+                createdAt: 1
+            }
+        }
+    ]);
+    if(!channel?.length){
+        throw new NotFoundError("Channel");
+    }
+    return channel[0];
+};
+
 export { 
     loginUser,
     refreshAccessToken,
     changePassword,
     updateAccountDetails,
-    updateUserAvatar
+    updateUserAvatar,
+    updateUserCoverImage,
+    getUserChannelProfile
 };

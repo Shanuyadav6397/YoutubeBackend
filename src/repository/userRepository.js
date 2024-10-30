@@ -30,4 +30,13 @@ async function updateUser(parameters, update) {
     }
 }
 
-export { createUser, findUser, updateUser };
+async function aggergateUser(parameters) {
+    try {
+        const user = await User.aggregate([{...parameters}]);
+        return user;
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export { createUser, findUser, updateUser, aggergateUser };
