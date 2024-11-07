@@ -49,11 +49,10 @@ async function refreshToken(req, res) {
 }
 
 async function logout(req, res){
-  await updateUser(req.user.id, {generateRefreshToken: null});
-  res.clearCookie("generateAccessToken", response, {
+  res.clearCookie("generateAccessToken", {
     httpOnly: true,
     secure: true,
-  }).clearCookie("generateRefreshToken", response, {
+  }).clearCookie("generateRefreshToken", {
     httpOnly: true,
     secure: true,
   });

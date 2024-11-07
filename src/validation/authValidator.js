@@ -6,15 +6,12 @@ import { ApiError } from "../utils/ApiError.js";
 
 async function loggedIn(req, res, next){
     const token = req.cookies.generateAccessToken || req.header("Authorization")?.replace("Bearer ", ""); // get the token from the cookie or from the header
-    console.log("token ",token);
     if(!token){
         return res.status(401).json(new ApiError(401, "Unauthorized", "Token is required", {}));
     }
     console.log("token ",token);
     try {
-        console.log("Reached try part");
-        const decodedToken = jwt.verify(token, JWT_ACCESS_TOKEN_SECRET);
-        console.log("decodedToken ",decodedToken);
+        const decodedToken = jwt.verify(token.generateRefreshToken, JWT_ACCESS_TOKEN_SECRET);
         if (!decodedToken){
             return res.status(401).json(new ApiError(401, "Unauthorized", "Invalid token", {}));
         }
@@ -30,7 +27,7 @@ async function loggedIn(req, res, next){
             message = "Token has expired";
         }
         console.log(error);
-        return res.status(401).json(new ApiError(401, "Unauthorized", "Invalid token2", {}));
+        return res.status(401).json(new ApiError(401, "Unauthorized", "Invalid token", {}));
     }
 }
 
