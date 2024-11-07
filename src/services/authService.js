@@ -9,6 +9,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { NotFoundError } from "../utils/notFoundError.js";
 import { uploadOnCloudinary } from "../config/cloudinaryConfig.js";
+import mongoose from "mongoose";
 
 async function loginUser(userAuthDetails) {
     // 1. username or email and password are required
@@ -158,7 +159,7 @@ async function updateUserAvatar(avatarDetails){
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     console.log(avatar.url);
     if(!avatar.url){
-        throw new ApiError(500, "Error when  uploading the avatar on cloudinary");
+        throw new ApiError(500, "Error when uploading the avatar on cloudinary");
     }
     // 3. find the user with the id and update the user avatar
     const user = await updateUser({_id: avatarDetails.id}, {
@@ -207,11 +208,18 @@ async function updateUserCoverImage(coverImageDetails){
         throw new ApiError(400, "Username is missing");
     } 
     // 2. find the user with the given username and populate the subscribers and subscribedTo
-    const channel = await aggergateUser([
+    const channel = await aggergateUser(
         {
+            // $match operator filters the documents
             $match: {userName: userName?.toLowerCase()}
         },
         {
+            /* 
+               $lookup operator performs a left outer join to an unsharded collection
+               in the same database to filter in documents from the "joined" 
+               collection for processing.
+            */
+           // 1st lookup that finds the subscribers of the channel
             $lookup: {
                 from: "subscriptions",
                 localField: "_id",
@@ -220,6 +228,7 @@ async function updateUserCoverImage(coverImageDetails){
             }
         },
         {
+            // 2nd lookup that finds the channels that the user is subscribed to
             $lookup:{
                 from: "subscriptions",
                 localField: "_id",
@@ -228,11 +237,16 @@ async function updateUserCoverImage(coverImageDetails){
             }
         },
         {
+            // $addFields operator adds new fields to the User document(schema).
             $addFields: {
+                // $size operator returns the number of elements in the array.
+                // we use $subscribers because it is the feild that contains the subscribers
                 totalSubscribers: {$size: "$subscribers"},
                 totalSubscribedTo: {$size: "$subscribedTo"},
                 isSubscribed: {
+                    // $cond operator is a ternary operator for subscribed or not
                     $cond: {
+                        // $in operator checks if the user id is in the subscribers array
                         if:{$in: [userDetils.id, "$subscribers.subscriber"]},
                         then: true,
                         else: false
@@ -241,6 +255,7 @@ async function updateUserCoverImage(coverImageDetails){
             }
         },
         {
+            // $project operator reshapes each document in the stream
             $project: {
                 userName: 1,
                 firstName: 1,
@@ -254,10 +269,12 @@ async function updateUserCoverImage(coverImageDetails){
                 createdAt: 1
             }
         }
-    ]);
+    );
+    console.log(channel);
     if(!channel?.length){
         throw new NotFoundError("Channel");
     }
+    // aggerdateUser returns an array of users, so we return the first user
     return channel[0];
 };
 
@@ -268,7 +285,7 @@ async function getUserWatchHistory(userWatchHistoryDetails){
         throw new ApiError(400, "User id is required");
     }
     // 2. find the user with the id and populate the watch history
-    const user = await aggergateUser([
+    const user = await aggergateUser(
         {
             $match: {_id: new mongoose.Types.ObjectId(id)} // convert the string id to object id
         },
@@ -305,7 +322,7 @@ async function getUserWatchHistory(userWatchHistoryDetails){
                 ]
             }
         }
-    ]);
+    );
     if(!user?.length){
         throw new NotFoundError("User");
     }

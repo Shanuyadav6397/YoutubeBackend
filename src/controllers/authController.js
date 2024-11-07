@@ -4,7 +4,8 @@ import {
   refreshAccessToken,
   updateAccountDetails,
   updateUserAvatar,
-  getUserChannelProfile 
+  getUserChannelProfile,
+  getUserWatchHistory 
 } from "../services/authService.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -48,7 +49,7 @@ async function refreshToken(req, res) {
 }
 
 async function logout(req, res){
-  await updatedUser(req.user.id, {generateRefreshToken: undefined});
+  await updateUser(req.user.id, {generateRefreshToken: null});
   res.clearCookie("generateAccessToken", response, {
     httpOnly: true,
     secure: true,
@@ -106,7 +107,7 @@ async function  updateUser(req, res) {
 
  async function getChannelProfile(req, res){
   try {
-    const user = await getUserChannelProfile({userName: req.params.userName, id: req.user.id});
+    const user = await getUserChannelProfile({userName: req.params.userName, id: req.params.id});
     return res.status(200).json(new ApiResponse(200, "Channel profile fetched successfully", user, {}));
   } catch (error) {
     console.log(error);
@@ -117,7 +118,7 @@ async function  updateUser(req, res) {
 
  async function getWatchHistory(req, res){
   try {
-    const user = await getUserWatchHistory({id: req.user.id});
+    const user = await getUserWatchHistory({id: req.body.id});
     return res.status(200).json(new ApiResponse(200, "Watch history fetched successfully", user, {}));
   } catch (error) {
     console.log(error);

@@ -11,7 +11,7 @@ async function createUser(req, res) {
       lastName: req.body.lastName,
       email: req.body.email,
       avatar: req.files?.avatar?.[0]?.path,
-      coverImage: req.files?.coverImage?.[0].path,
+      coverImage: req.files?.coverImage?.[0].path || " ",
       password: req.body.password,
     });
     return res
@@ -19,7 +19,7 @@ async function createUser(req, res) {
       .json(new ApiResponse(200, "User registered successfully", newUser, null));
   } catch (error) {
     console.log(error);
-    throw new ApiError(500, "Something went wrong");
+    throw new ApiResponse(500, "Something went wrong");
   }
 }
 
