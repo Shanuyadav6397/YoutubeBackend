@@ -29,26 +29,20 @@ async function registerUser(userDetails) {
   const avtarImageLocalPath = userDetails.avatar; // path of the avatar image
   const coverImageLocalPath = userDetails.coverImage; // path of the cover image
   
-  console.log(userDetails);
   if (!avtarImageLocalPath) {
     throw new ApiError(400, "Please provide avatar");
   }
-
-  
 
   // Step-3  upload them to cloudinary
   const avatar = await uploadOnCloudinary(avtarImageLocalPath);
   if (!avatar) {
     throw new ApiError(500, "Something went wrong while uploading Avatar");
   }
-  console.log("avatar local image path ",avtarImageLocalPath)
-  console.log("avatar",avatar);
   
   const coverImage = await uploadOnCloudinary(coverImageLocalPath);
   if (!(" " || coverImage)) {
     throw new ApiError(500, "Something went wrong while uploading coverImage");
   }
-  console.log("coverImage",coverImage);
 
 
   // Step-4 create a new user

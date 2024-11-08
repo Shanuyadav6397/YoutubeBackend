@@ -21,8 +21,8 @@ authRouter.route("/logout").post(loggedIn, logout);
 authRouter.route("/refreshToken").post(refreshToken);
 authRouter.route("/changePassword").patch(loggedIn, changeCurrentPassword);
 authRouter.route("/updateDetails").patch(loggedIn, updateUserDetails);
-authRouter.route("/updateAvatar").patch(upload.single("avatar"), updateAvatar);
-authRouter.route("/updateCoverImage").patch(upload.single("coverImage"), updateCoverImage);
+authRouter.route("/updateAvatar").patch(loggedIn, upload.single("avatar"), updateAvatar);
+authRouter.route("/updateCoverImage").patch(loggedIn, upload.single("coverImage"), updateCoverImage);
 authRouter.route("/channel/:userName").get(loggedIn, getChannelProfile);
 authRouter.route("/watchHistory").get(loggedIn, getWatchHistory);
 

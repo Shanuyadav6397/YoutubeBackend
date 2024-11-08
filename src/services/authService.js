@@ -14,7 +14,6 @@ import mongoose from "mongoose";
 async function loginUser(userAuthDetails) {
     // 1. username or email and password are required
     const {userName, email, password} = userAuthDetails;
-    console.log(userName, email, password);
     if(!(userName || email)){
         throw new ApiError(400, "Username or email is required");
     }
@@ -22,34 +21,28 @@ async function loginUser(userAuthDetails) {
     const user = await findUser({
         $or: [{userName}, {email}]
     });
-    console.log(user);
     // if the user not found
     if(!user){
         throw new NotFoundError("User");
     }
     // 3. if the user is found validate the password
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    console.log(user);
     // if the password is invalid
     if(!isPasswordValid){
         throw new ApiError(401, "Invalid password, please try again");
     }
-    console.log(isPasswordValid);
     // 4. if the password is valid then Generate the access token and refresh token
     const generateAccessToken = jwt.sign(
         {email: user.email, userName:user.userName, id: user._id},
         JWT_ACCESS_TOKEN_EXPIRE,
         {expiresIn:JWT_ACCESS_TOKEN_EXPIRE}
     );
-    console.log("Access Token",generateAccessToken);
 
     const generateRefreshToken = jwt.sign(
         {id: user._id},
         JWT_REFRESH_TOKEN_SECRET,
         {expiresIn: JWT_REFRESH_TOKEN_EXPIRE}
     );
-    console.log("Refresh Token",generateRefreshToken);
-    console.log(user._id);
 
     user.refreshToken = generateRefreshToken;
     await user.save({validateBeforeSave: false}); // save the refresh token in the database wihout validating the required fields
@@ -83,7 +76,7 @@ async function refreshAccessToken(userRefreshTokenDetails){
             JWT_ACCESS_TOKEN_EXPIRE,
             {expiresIn:JWT_ACCESS_TOKEN_EXPIRE}
         );
-        // 5. return the new access token
+    // 5. return the new access token
         return generateAccessToken;
     } catch (error) {
         throw new ApiError(500, "Internal server error, please try again");
@@ -148,16 +141,13 @@ async function updateAccountDetails(accountDetails){
 }
 
 async function updateUserAvatar(avatarDetails){
-    console.log(avatarDetails);
     // 1. check if the avatar is provided
     const avatarLocalPath = avatarDetails.file.path;
-    console.log(avatarLocalPath);
     if(!avatarLocalPath){
         throw new ApiError(400, "Avatar is required");
     }
     // 2. upload the avatar to the cloudinary
     const avatar = await uploadOnCloudinary(avatarLocalPath);
-    console.log(avatar.url);
     if(!avatar.url){
         throw new ApiError(500, "Error when uploading the avatar on cloudinary");
     }
@@ -175,16 +165,13 @@ async function updateUserAvatar(avatarDetails){
 }
 
 async function updateUserCoverImage(coverImageDetails){
-    console.log(coverImageDetails);
     // 1. check if the cover image is provided
     const coverImageLocalPath = coverImageDetails.file.path;
-    console.log(coverImageLocalPath);
     if(!coverImageLocalPath){
         throw new ApiError(400, "Cover Image is required");
     }
     // 2. upload the cover image to the cloudinary
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
-    console.log(coverImage.url);
     if(!coverImage.url){
         throw new ApiError(500, "Error when  uploading the cover Image on cloudinary");
     }
@@ -204,8 +191,6 @@ async function updateUserCoverImage(coverImageDetails){
  async function getUserChannelProfile(userDetils){
     // 1. check if the username is provided
     const { userName } = userDetils;
-    console.log(userDetils);
-    console.log("UserName   "+userName);
     if(!userName?.trim()){
         throw new ApiError(400, "Username is missing");
     } 
@@ -272,7 +257,6 @@ async function updateUserCoverImage(coverImageDetails){
             }
         }
     );
-    console.log(channel);
     if(!channel?.length){
         throw new NotFoundError("Channel");
     }

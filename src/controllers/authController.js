@@ -5,7 +5,8 @@ import {
   updateAccountDetails,
   updateUserAvatar,
   getUserChannelProfile,
-  getUserWatchHistory 
+  getUserWatchHistory,
+  updateUserCoverImage
 } from "../services/authService.js";
 import {updateUser} from "../repository/userRepository.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -33,7 +34,6 @@ async function login(req, res) {
 async function refreshToken(req, res) {
   try {
     const refreshToken = req.cookies.generateRefreshToken || req.body.generateRefreshToken;
-    console.log(refreshToken);
     const response = await refreshAccessToken(refreshToken);
     res.cookie('generateAccessToken', response, {
       httpOnly: true, // this cookie cannot be accessed by client side javascript
@@ -90,7 +90,7 @@ async function  updateUserDetails(req, res) {
 }
  async function updateAvatar(req, res){
   try {
-    const user = await updateUserAvatar({ id: req.body.id, file: req.file }); 
+    const user = await updateUserAvatar({ id: req.user._id, file: req.file }); 
     return res.status(200).json(new ApiResponse(200, "User avatar updated successfully", user, {}));
   } catch (error) {
     console.log(error);
@@ -100,7 +100,7 @@ async function  updateUserDetails(req, res) {
  }
  async function updateCoverImage(req, res){
   try {
-    const user = await updateUserCoverImage({ id: req.body.id, file: req.file }); 
+    const user = await updateUserCoverImage({ id: req.user._id, file: req.file }); 
     return res.status(200).json(new ApiResponse(200, "User cover image updated successfully", user, {}));
   } catch (error) {
     console.log(error);
@@ -122,7 +122,6 @@ async function  updateUserDetails(req, res) {
 
  async function getWatchHistory(req, res){
   try {
-    console.log(req.user);
     const user = await getUserWatchHistory(req.user._id);
     return res.status(200).json(new ApiResponse(200, "Watch history fetched successfully", user, {}));
   } catch (error) {
