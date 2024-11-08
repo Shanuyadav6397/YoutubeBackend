@@ -91,10 +91,9 @@ async function refreshAccessToken(userRefreshTokenDetails){
 }
 
 async function changePassword(userChangePasswordDetails){
-    const { oldPassword, newPassword, confirmPassword } = userChangePasswordDetails;
+    const { oldPassword, newPassword, confirmPassword } = userChangePasswordDetails.body;
     // 0. get the user
-    const user = await findUser({_id: userChangePasswordDetails.id});
-    console.log(user);
+    const user = await findUser({_id: userChangePasswordDetails.userId});
     if(!user){
         throw new NotFoundError("User");
     }
@@ -121,7 +120,8 @@ async function changePassword(userChangePasswordDetails){
 
 async function updateAccountDetails(accountDetails){
     // 1. check if the email is provided
-    const { email, id } = accountDetails; 
+    const { email } = accountDetails.email; 
+    const { _id } = accountDetails.userId;
     if(!email){
         throw new ApiError(400, "Email is required");
     }
@@ -135,7 +135,7 @@ async function updateAccountDetails(accountDetails){
         throw new ApiError(400, "Please fill a valid email address");
     }
     // 3. find the user with the id and update the user email
-    const user = await updateUser({_id: id}, {
+    const user = await updateUser({_id: _id}, {
         $set: {
             email:email
         }
@@ -204,6 +204,8 @@ async function updateUserCoverImage(coverImageDetails){
  async function getUserChannelProfile(userDetils){
     // 1. check if the username is provided
     const { userName } = userDetils;
+    console.log(userDetils);
+    console.log("UserName   "+userName);
     if(!userName?.trim()){
         throw new ApiError(400, "Username is missing");
     } 
@@ -276,18 +278,17 @@ async function updateUserCoverImage(coverImageDetails){
     }
     // aggerdateUser returns an array of users, so we return the first user
     return channel[0];
-};
+}
 
-async function getUserWatchHistory(userWatchHistoryDetails){
+async function getUserWatchHistory(userId){
     // 1. check if the user id is provided
-    const { id } = userWatchHistoryDetails;
-    if(!id){
+    if(!userId){
         throw new ApiError(400, "User id is required");
     }
     // 2. find the user with the id and populate the watch history
     const user = await aggergateUser(
         {
-            $match: {_id: new mongoose.Types.ObjectId(id)} // convert the string id to object id
+            $match: {_id: new mongoose.Types.ObjectId(userId)} // convert the string id to object id
         },
         {
             $lookup: {

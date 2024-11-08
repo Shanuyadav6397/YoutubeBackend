@@ -9,7 +9,6 @@ async function loggedIn(req, res, next){
     if(!token){
         return res.status(401).json(new ApiError(401, "Unauthorized", "Token is required", {}));
     }
-    console.log("token ",token);
     try {
         const decodedToken = jwt.verify(token.generateRefreshToken, JWT_ACCESS_TOKEN_SECRET);
         if (!decodedToken){
@@ -18,7 +17,7 @@ async function loggedIn(req, res, next){
         req.user = {
             email: decodedToken.email,
             username: decodedToken.username,
-            id: decodedToken.id
+            _id: decodedToken.id
         }
         next();
     } catch (error) {

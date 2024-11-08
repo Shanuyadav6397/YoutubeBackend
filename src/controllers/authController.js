@@ -7,6 +7,7 @@ import {
   getUserChannelProfile,
   getUserWatchHistory 
 } from "../services/authService.js";
+import {updateUser} from "../repository/userRepository.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 async function login(req, res) {
@@ -49,21 +50,25 @@ async function refreshToken(req, res) {
 }
 
 async function logout(req, res){
-  res.clearCookie("generateAccessToken", {
+  await updateUser(req.user._id,
+    {
+      $unset: { refreshToken:1}
+    }
+  )
+  const options = {
     httpOnly: true,
     secure: true,
-  }).clearCookie("generateRefreshToken", {
-    httpOnly: true,
-    secure: true,
-  });
-  return res.status(200).json(new ApiResponse(200, "Logged out successfully", {}, {}));
+  };
+  return res.status(200)
+  .clearCookie("generateAccessToken", options)
+  .clearCookie("generateRefreshToken", options)
+  .json(new ApiResponse(200, "Log out successfull", {}, {}));
   
 }
 
 async function changeCurrentPassword(req, res){
   try {
-    const changePasswordPayload = req.body;
-    const response = await changePassword(changePasswordPayload);
+    const response = await changePassword({body:req.body, userId: req.user._id});
     return res.status(200).json(new ApiResponse(200, "Password changed successfully", response, {}));
   } catch (error) {
     console.log(error);
@@ -72,9 +77,9 @@ async function changeCurrentPassword(req, res){
   }
 }
 
-async function  updateUser(req, res) {
+async function  updateUserDetails(req, res) {
   try {
-    const user = req.body;
+    const user = {email:req.body, userId:req.user};
     const response = await updateAccountDetails(user);
     return res.status(200).json(new ApiResponse(200, "User details updated successfully", response, {}));
   } catch (error) {
@@ -106,7 +111,7 @@ async function  updateUser(req, res) {
 
  async function getChannelProfile(req, res){
   try {
-    const user = await getUserChannelProfile({userName: req.params.userName, id: req.params.id});
+    const user = await getUserChannelProfile({userName:req.params.userName});
     return res.status(200).json(new ApiResponse(200, "Channel profile fetched successfully", user, {}));
   } catch (error) {
     console.log(error);
@@ -117,7 +122,8 @@ async function  updateUser(req, res) {
 
  async function getWatchHistory(req, res){
   try {
-    const user = await getUserWatchHistory({id: req.body.id});
+    console.log(req.user);
+    const user = await getUserWatchHistory(req.user._id);
     return res.status(200).json(new ApiResponse(200, "Watch history fetched successfully", user, {}));
   } catch (error) {
     console.log(error);
@@ -131,7 +137,7 @@ export {
   refreshToken,
   logout,
   changeCurrentPassword,
-  updateUser,
+  updateUserDetails,
   updateAvatar,
   updateCoverImage,
   getChannelProfile,

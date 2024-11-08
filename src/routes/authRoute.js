@@ -4,7 +4,7 @@ import {
     login,
     logout,
     refreshToken,
-    updateUser,
+    updateUserDetails,
     updateAvatar,
     updateCoverImage,
     getChannelProfile,
@@ -19,12 +19,12 @@ const authRouter = express.Router();
 authRouter.route("/login").post(login);
 authRouter.route("/logout").post(loggedIn, logout);
 authRouter.route("/refreshToken").post(refreshToken);
-authRouter.route("/changePassword").patch(changeCurrentPassword);
-authRouter.route("/updateDetails").patch(updateUser);
+authRouter.route("/changePassword").patch(loggedIn, changeCurrentPassword);
+authRouter.route("/updateDetails").patch(loggedIn, updateUserDetails);
 authRouter.route("/updateAvatar").patch(upload.single("avatar"), updateAvatar);
 authRouter.route("/updateCoverImage").patch(upload.single("coverImage"), updateCoverImage);
-authRouter.route("/channel/:userName").get(getChannelProfile);
-authRouter.route("/watchHistory").get(getWatchHistory);
+authRouter.route("/channel/:userName").get(loggedIn, getChannelProfile);
+authRouter.route("/watchHistory").get(loggedIn, getWatchHistory);
 
 
 
