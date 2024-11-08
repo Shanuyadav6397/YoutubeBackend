@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
 import { JWT_ACCESS_TOKEN_SECRET } from "../config/serverConfig.js";
 import { ApiError } from "../utils/ApiError.js";
+import { findUser } from "../repository/userRepository.js";
 
 
 
 async function loggedIn(req, res, next){
-    const token = req.cookies.generateAccessToken || req.header("Authorization")?.replace("Bearer ", ""); // get the token from the cookie or from the header
+    const token = req.cookies.generateAccessToken; // get the token from the cookie or from the header
     if(!token){
         return res.status(401).json(new ApiError(401, "Unauthorized", "Token is required", {}));
     }
@@ -14,11 +15,11 @@ async function loggedIn(req, res, next){
         if (!decodedToken){
             return res.status(401).json(new ApiError(401, "Unauthorized", "Invalid token", {}));
         }
-        req.user = {
-            email: decodedToken.email,
-            username: decodedToken.username,
-            _id: decodedToken.id
+        const user = await findUser(decodedToken.id);
+        if (!user){
+            return res.status(401).json(new ApiError(401, "Unauthorized", "Invalid Access token", {}));
         }
+        req.user = user;
         next();
     } catch (error) {
         // Check if the error is related to expiration

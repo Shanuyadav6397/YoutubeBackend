@@ -33,13 +33,13 @@ async function loginUser(userAuthDetails) {
     }
     // 4. if the password is valid then Generate the access token and refresh token
     const generateAccessToken = jwt.sign(
-        {email: user.email, userName:user.userName, id: user._id},
+        {email: user.email, userName:user.userName, _id: user._id},
         JWT_ACCESS_TOKEN_EXPIRE,
         {expiresIn:JWT_ACCESS_TOKEN_EXPIRE}
     );
 
     const generateRefreshToken = jwt.sign(
-        {id: user._id},
+        {_id: user._id},
         JWT_REFRESH_TOKEN_SECRET,
         {expiresIn: JWT_REFRESH_TOKEN_EXPIRE}
     );
@@ -62,7 +62,7 @@ async function refreshAccessToken(userRefreshTokenDetails){
         throw new ApiError(401, "unauthorized, please login to get the access token");
     }
     // 3. find the user with the id from the refresh token
-    const user = await findUser({_id: decodedToken.id});
+    const user = await findUser({_id: decodedToken._id});
     if(!user){
         throw new ApiError(401, "Invalid refresh token, please login to get the access token");
     }
@@ -72,12 +72,20 @@ async function refreshAccessToken(userRefreshTokenDetails){
     // 4. generate the new access token
     try {
         const generateAccessToken = jwt.sign(
-            {email: user.email, userName:user.userName, id: user._id},
+            {email: user.email, userName:user.userName, _id: user._id},
             JWT_ACCESS_TOKEN_EXPIRE,
             {expiresIn:JWT_ACCESS_TOKEN_EXPIRE}
         );
+        const generateRefreshToken = jwt.sign(
+            {_id: user._id},
+            JWT_REFRESH_TOKEN_SECRET,
+            {expiresIn: JWT_REFRESH_TOKEN_EXPIRE}
+        );
+        user.refreshToken = generateRefreshToken;
+        await user.save({validateBeforeSave: false});
+        
     // 5. return the new access token
-        return generateAccessToken;
+        return {generateAccessToken, generateRefreshToken};
     } catch (error) {
         throw new ApiError(500, "Internal server error, please try again");
     }

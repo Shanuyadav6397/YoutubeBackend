@@ -50,11 +50,7 @@ async function refreshToken(req, res) {
 }
 
 async function logout(req, res){
-  await updateUser(req.user._id,
-    {
-      $unset: { refreshToken:1}
-    }
-  )
+  await updateUser(req.user._id, {refreshToken: null});
   const options = {
     httpOnly: true,
     secure: true,
