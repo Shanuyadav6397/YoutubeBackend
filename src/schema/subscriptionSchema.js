@@ -1,14 +1,14 @@
-import mongoose from "mongoose";
+import mongoose, {Schema} from "mongoose";
 
-const subscriptionSchema = new mongoose.Schema({
+const subscriptionSchema = new Schema({
     subscriber: {
         // we find the channels a user is subscribed to by finding all the subscriptions where the subscriber is the same as the user id
-        type: mongoose.Schema.Types.ObjectId, // one who is subscribing
+        type: Schema.Types.ObjectId, // one who is subscribing
         ref: "User",
     },
     channel: {
         // we find the subscribers of a channel by finding all the subscriptions where the channel is the same as the channel id
-        type: mongoose.Schema.Types.ObjectId, // one who is being subscribed
+        type: Schema.Types.ObjectId, // one who is being subscribed
         ref: "User",
     },
 }, {timestamps: true});

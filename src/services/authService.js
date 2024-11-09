@@ -8,7 +8,11 @@ import { ApiError } from "../utils/ApiError.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { NotFoundError } from "../utils/notFoundError.js";
-import { uploadOnCloudinary, deleteFromCloudinary, getPublicIdFromUrl } from "../config/cloudinaryConfig.js";
+import {
+    uploadOnCloudinary,
+    deleteFromCloudinary,
+    getPublicIdFromUrl
+} from "../config/cloudinaryConfig.js";
 import mongoose from "mongoose";
 
 async function loginUser(userAuthDetails) {

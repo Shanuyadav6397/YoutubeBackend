@@ -1,7 +1,9 @@
 import mongoose, {Schema} from "mongoose";
-import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";// pagination aggregate plugin for mongoose
-// It is a plugin for mongoose which adds a paginate method to the Model for easy pagination support.
-// It is seprarate topic in mongoose so you can read more about it in mongoose documentation
+import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";/* pagination
+aggregate plugin for mongoose It is a plugin for mongoose which adds a paginate method
+to the Model for easy pagination support. It is seprarate topic in mongoose so you can
+read more about it in mongoose documentation
+*/
 
 const videoSchema = new Schema({
     videoFile: {
