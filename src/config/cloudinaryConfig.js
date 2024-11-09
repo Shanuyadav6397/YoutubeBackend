@@ -27,19 +27,26 @@ const uploadOnCloudinary = async (LocalFilePath) =>{
     }
 }
 
-// Function to delete a file from Cloudinary
-// const deleteFromCloudinary = async (publicId) => {
-//     try {
-//         if (!publicId) {
-//             throw new Error("Public ID is required to delete a file from Cloudinary");
-//         }
+// Function to extract the public ID from a Cloudinary URL
+function getPublicIdFromUrl(url) {
+    // This regex captures the public ID part from a typical Cloudinary URL
+    const match = url.match(/\/upload\/(?:v\d+\/)?(.+?)(\.[a-zA-Z]+)?$/);
+    return match ? match[1] : null;
+}
 
-//         const result = await cloudinary.uploader.destroy(publicId, { invalidate: true });
-//         console.log("File deleted from Cloudinary:", result);
-//         return result;
-//     } catch (error) {
-//         console.log("Error deleting file from Cloudinary:", error);
-//         return null;
-//     }
-// };
-export {uploadOnCloudinary};
+//Function to delete a file from Cloudinary
+const deleteFromCloudinary = async (publicId) => {
+    try {
+        if (!publicId) {
+            throw new Error("Public ID is required to delete a file from Cloudinary");
+        }
+        // invalidate: true means that the file will be deleted immediately and CDN cache will be cleared   
+        const result = await cloudinary.uploader.destroy(publicId, { invalidate: true });
+        console.log("File deleted from Cloudinary:", result);
+        return result;
+    } catch (error) {
+        console.log("Error deleting file from Cloudinary:", error);
+        return null;
+    }
+};
+export {uploadOnCloudinary, getPublicIdFromUrl, deleteFromCloudinary};

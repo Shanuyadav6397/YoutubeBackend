@@ -8,7 +8,7 @@ import { ApiError } from "../utils/ApiError.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { NotFoundError } from "../utils/notFoundError.js";
-import { uploadOnCloudinary } from "../config/cloudinaryConfig.js";
+import { uploadOnCloudinary, deleteFromCloudinary, getPublicIdFromUrl } from "../config/cloudinaryConfig.js";
 import mongoose from "mongoose";
 
 async function loginUser(userAuthDetails) {
@@ -159,7 +159,21 @@ async function updateUserAvatar(avatarDetails){
     if(!avatar.url){
         throw new ApiError(500, "Error when uploading the avatar on cloudinary");
     }
-    // 3. find the user with the id and update the user avatar
+    // 3. find the user by id
+    const user1 = await findUser({_id: avatarDetails.id});
+    if(!user1){
+        throw new NotFoundError("User");
+    }
+    // 4. extract the avatar public id
+    const avatarPublicId = user1.avatar ? user1.avatar.split("/").pop().split(".")[0] : null;
+    if(!avatarPublicId){
+        throw new ApiError(500, "Error when extracting the avatar public id");
+    }
+    // 5. delete the old avatar from the cloudinary
+    if(avatarPublicId){
+        await deleteFromCloudinary(avatarPublicId);
+    }
+    // 6. find the user with the id and update the user avatar
     const user = await updateUser({_id: avatarDetails.id}, {
         $set: {
             avatar: avatar.url
@@ -183,7 +197,22 @@ async function updateUserCoverImage(coverImageDetails){
     if(!coverImage.url){
         throw new ApiError(500, "Error when  uploading the cover Image on cloudinary");
     }
-    // 3. find the user with the id and update the user avatar
+    // 3. find the user by id
+    const user1 = await findUser({_id: coverImageDetails.id});
+    if(!user1){
+        throw new NotFoundError("User");
+    }
+    // 4. extract the cover image public id
+    const coverImagePublicId = getPublicIdFromUrl(user1.coverImage);
+    if(!coverImagePublicId){
+        throw new ApiError(500, "Error when extracting the cover image public id");
+    }
+    // 5. delete the old cover image from the cloudinary
+    if(coverImagePublicId){
+        await deleteFromCloudinary(coverImagePublicId);
+    }
+
+    // 6. find the user with the id and update the user cover image
     const user = await updateUser({_id: coverImageDetails.id}, {
         $set: {
             coverImage: coverImage.url
