@@ -29,7 +29,7 @@ const videoSchema = new Schema({
     },
     duration: {
         type: Number,
-        required: [true, "Please provide a duration"],
+        //required: [true, "Please provide a duration"],
     },
     views: {
         type: Number,
@@ -41,7 +41,8 @@ const videoSchema = new Schema({
     },
     owner: {
         type: Schema.Types.ObjectId,
-        ref: "User"
+        ref: "User",
+        required: [true, "You can't create a video without an owner"]
     },
     likes: {
         type: Number,
