@@ -34,6 +34,15 @@ function getPublicIdFromUrl(url) {
     return match ? match[1] : null;
 }
 
+function getVideoPublicIdFromUrl(url) {
+    // Remove query params if any
+    const baseUrl = url.split("?")[0];
+    // Split the URL by '/' and extract the part before the extension
+    const parts = baseUrl.split("/");
+    const publicIdWithExtension = parts[parts.length - 1];
+    const publicId = publicIdWithExtension.split(".")[0];
+    return publicId;
+}
 //Function to delete a file from Cloudinary
 const deleteFromCloudinary = async (publicId) => {
     try {
@@ -49,4 +58,25 @@ const deleteFromCloudinary = async (publicId) => {
         return null;
     }
 };
-export {uploadOnCloudinary, getPublicIdFromUrl, deleteFromCloudinary};
+
+const deleteVideoFromCloudinary = async (publicId) => {
+    try {
+        if (!publicId) {
+            throw new Error("Public ID is required to delete a file from Cloudinary");
+        }
+        // invalidate: true means that the file will be deleted immediately and CDN cache will be cleared   
+        const result = await cloudinary.uploader.destroy(publicId, {resource_type: "video", invalidate: true });
+        console.log("File deleted from Cloudinary:", result);
+        return result;
+    } catch (error) {
+        console.log("Error deleting file from Cloudinary:", error);
+        return null;
+    }
+};
+export {
+    uploadOnCloudinary,
+    getPublicIdFromUrl,
+    deleteFromCloudinary,
+    getVideoPublicIdFromUrl,
+    deleteVideoFromCloudinary
+};

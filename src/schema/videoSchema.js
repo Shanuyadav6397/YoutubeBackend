@@ -24,6 +24,7 @@ const videoSchema = new Schema({
     description: {
         type: String,
         required: [true, "Please provide a description"],
+        minlength: [10, "Description should be at least 10 characters"],
         trim: true,
         lowercase: true
     },
